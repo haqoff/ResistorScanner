@@ -3,23 +3,24 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         config {
-            keyAlias 'Blah'
-            keyPassword 'xxx'
-            storeFile file('keys.jks')
-            storePassword 'xxx'
+            keyAlias 'keytest'
+            keyPassword 'keytest'
+            storeFile file('keystore.jks')
+            storePassword 'keytest'
         }
     }
     splits {
 
     }
-    compileSdkVersion 24
+    compileSdkVersion 29
     buildToolsVersion "24.0.3"
     defaultConfig {
         applicationId "ru.haqon.resistordecoder"
         minSdkVersion 21
-        targetSdkVersion 24
+        targetSdkVersion 29
         versionCode 2
         versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -32,10 +33,14 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:24.2.1"
-    compile 'com.quickbirdstudios:opencv:4.3.0'
-    compile 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.quickbirdstudios:opencv:4.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'com.quickbirdstudios:opencv:4.3.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test:rules:1.1.0'
 }
 
 ext.versionCodes = [armeabi: 1, 'armeabi-v7a': 3]

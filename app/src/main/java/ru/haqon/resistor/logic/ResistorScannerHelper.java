@@ -27,8 +27,10 @@ public class ResistorScannerHelper {
             {new Range(new Scalar(0, 0, 0), new Scalar(180, 250, 50))},    // black
             {new Range(new Scalar(0, 31, 41), new Scalar(25, 250, 99))},    // brown
             {new Range(new Scalar(0, 65, 100), new Scalar(2, 250, 150)),
-                    new Range(new Scalar(171, 65, 50), new Scalar(180, 250, 150)),
-                    new Range(new Scalar(357, 66, 45), new Scalar(359, 81, 54))},  // red (defined by 3 bounds)
+                    new Range(new Scalar(160, 65, 50), new Scalar(180, 250, 150)),
+                    new Range(new Scalar(357, 66, 45), new Scalar(359, 81, 54)),
+                    new Range(new Scalar(0, 75, 45), new Scalar(10, 100, 100)),
+                    new Range(new Scalar(80, 70, 50), new Scalar(100, 255, 255)),},  // red
             {new Range(new Scalar(7, 150, 150), new Scalar(18, 250, 250))},   // orange
             {new Range(new Scalar(25, 130, 100), new Scalar(34, 250, 160))}, // yellow
             {new Range(new Scalar(35, 60, 60), new Scalar(75, 250, 150))},   // green

@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+
+import androidx.core.app.ActivityCompat;
+
 import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.View;
@@ -20,11 +22,10 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.video.BackgroundSubtractor;
-import org.opencv.video.Video;
 
 import java.util.Date;
 
@@ -120,10 +121,15 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat imageMat = inputFrame.rgba();
-        int imageWidth = imageMat.cols();
-        int imageHeight = imageMat.rows();
 
-        Mat subMat = imageMat.submat(imageHeight / 2, imageHeight / 2 + 30, imageWidth / 2 - 50, imageWidth / 2 + 50);
+        final int imageWidth = imageMat.cols();
+        final int imageHeight = imageMat.rows();
+        final int searchMatFromX = imageWidth / 2 - 50;
+        final int searchMatToX = imageWidth / 2 + 50;
+        final int searchMatFromY = imageHeight / 2 - 10;
+        final int searchMatToY = imageHeight / 2 + 10;
+
+        Mat subMat = imageMat.submat(searchMatFromY, searchMatToY, searchMatFromX, searchMatToX);
         Mat filteredMat = new Mat();
         Imgproc.cvtColor(subMat, subMat, Imgproc.COLOR_RGBA2BGR);
         Imgproc.bilateralFilter(subMat, filteredMat, 5, 80, 80);
@@ -139,9 +145,19 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
                     2, new Scalar(255, 0, 0, 255), 3);
         }
 
+        Mat to = new Mat();
+        Imgproc.cvtColor(filteredMat, to, Imgproc.COLOR_HSV2RGB);
+        Imgproc.cvtColor(to, to, Imgproc.COLOR_RGB2RGBA);
+
+        for (int x = 0; x < to.width(); x++) {
+            for (int y = 0; y < to.height(); y++) {
+                imageMat.put(searchMatFromY + y, searchMatFromX + x, to.get(y, x));
+            }
+        }
+        Imgproc.rectangle(imageMat, new Rect(new Point(searchMatFromX, searchMatFromY), new Point(searchMatToX, searchMatToY)), new Scalar(0, 0, 255, 255), 1);
 
         Scalar color = new Scalar(255, 0, 0, 255);
-        Imgproc.line(imageMat, new Point(imageWidth / 2 - 50, imageHeight / 2), new Point(imageWidth / 2 + 50, imageHeight / 2), color, 2);
+        Imgproc.line(imageMat, new Point(searchMatFromX, imageHeight / 2), new Point(searchMatToX, imageHeight / 2), color, 2);
         return imageMat;
     }
 
