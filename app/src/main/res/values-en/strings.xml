@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Resistor Scanner</string>
+    <string name="dialog_message">Position the red line over the colour bands of the resistor,         keeping the tolerance band to the right</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_title">How to scan resistors</string>
+    <string name="action_settings">Settings</string>
+    <string name="caption_saved">Saved</string>
+    <string name="history_table_column_date">Date</string>
+    <string name="history_table_clear">Clear</string>
+    <string name="history_table_column_value">Value</string>
+    <string name="caption_value_Ohm">Ohm</string>
+    <string name="caption_value_KOhm">kOhm</string>
+    <string name="caption_value_MOhm">MOhm</string>
+    <string name="caption_value_GOhm">GOhm</string>
+    <string name="caption_value_POhm">POhm</string>
+    <string name="caption_value_TOhm">TOhm</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#DAE8FC"
+    android:padding="5dp">
+
+    <TextView
+        android:id="@+id/tableHistoryDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="15dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/tableHistoryValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="15dp"
+        android:layout_weight="1" />
+</TableRow>

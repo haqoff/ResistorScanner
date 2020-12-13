@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Сканнер резисторов</string>
+    <string name="dialog_message">Поместите красную линию на цветные полосы резистора,          удерживая полосу допуска справа</string>
+    <string name="dialog_title">Как сканировать резисторы</string>
+    <string name="dialog_ok">ОК</string>
+    <string name="action_settings">Настройки</string>
+    <string name="caption_saved">Сохранено</string>
+    <string name="history_table_column_date">Дата</string>
+    <string name="history_table_column_value">Значение</string>
+    <string name="history_table_clear">Очистить</string>
+    <string name="caption_value_Ohm">Ом</string>
+    <string name="caption_value_MOhm">МОм</string>
+    <string name="caption_value_KOhm">кОм</string>
+    <string name="caption_value_GOhm">ГОм</string>
+    <string name="caption_value_POhm">ПОм</string>
+    <string name="caption_value_TOhm">ТОм</string>
+</resources>
