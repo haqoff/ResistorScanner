@@ -2,61 +2,86 @@ package ru.haqon;
 
 import android.util.SparseIntArray;
 
-import org.junit.Assert;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
-import ru.haqon.resistor.logic.ResistorScannerHelper;
+import java.util.Arrays;
 
-/**
- * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
- */
+import ru.haqon.resistor.logic.ResistorScanner;
+
+@RunWith(DataProviderRunner.class)
 public class FindResistorColorsTests {
     static {
         OpenCVLoader.initDebug();
     }
 
-    @Test
-    public void testFindResistorColors() {
+    private static class TestSource {
+        private IndexToColorEnum colorName;
+        private Scalar[] colors;
 
-        Mat source = generateSimpleMatrixWithColors(new Scalar(24, 42, 51), new Scalar(0, 0, 0), new Scalar(0, 100, 100));
-        SparseIntArray res = ResistorScannerHelper.findResistorColors(source);
-        IndexToColorEnum[] expected = {IndexToColorEnum.BROWN, IndexToColorEnum.BLACK, IndexToColorEnum.RED};
-        assertColors(expected, res);
+        public TestSource(IndexToColorEnum colorName, Scalar[] colors) {
+            this.colorName = colorName;
+            this.colors = colors;
+        }
+
+        public TestSource(IndexToColorEnum colorName) {
+            this(colorName, new Scalar[0]);
+        }
+
+        public TestSource append(Scalar... newColors) {
+            Scalar[] array = new Scalar[colors.length + newColors.length];
+            System.arraycopy(colors, 0, array, 0, colors.length);
+            System.arraycopy(newColors, 0, array, colors.length, newColors.length);
+            colors = array;
+
+            return this;
+        }
+
+        public TestSource appendTestColors(int count) {
+            append(TestUtils.colorsFromName(colorName, count).toArray(new Scalar[0]));
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("TestSource{colorName=%s}", colorName.name());
+        }
     }
 
-    private static Mat generateSimpleMatrixWithColors(Scalar... scalars) {
-        Mat m = new Mat(50, 80, CvType.CV_8UC4, new Scalar(42, 51, 58));
+    @Test()
+    @UseDataProvider("getTestColors")
+    public void testColorRecognitionShouldRecognized(TestSource source) {
+        TestUtils.Gen gen = TestUtils.generateSimpleMatrixWithColors(source.colors);
+        SparseIntArray res = ResistorScanner.findResistorColors(gen.source, gen.colorsMask);
 
-        final int columnWidth = 5;
-        final int toNextColumnWidth = 5;
-        int startFromX = 0;
-
-        for (int currentScalarIndex = 0; currentScalarIndex < scalars.length; currentScalarIndex++) {
-            for (int x = startFromX; x < startFromX + columnWidth; x++) {
-                for (int y = 0; y < m.height(); y++) {
-                    m.put(y, x, scalars[currentScalarIndex].val);
-                }
-            }
-
-            startFromX += columnWidth + toNextColumnWidth;
-        }
-        return m;
+        IndexToColorEnum[] expected = new IndexToColorEnum[source.colors.length];
+        Arrays.fill(expected, source.colorName);
+        TestUtils.assertColors(expected, res, source.colors);
     }
 
-    private void assertColors(IndexToColorEnum[] expected, SparseIntArray actual) {
-        Assert.assertEquals("Кол-во ожидаемых цветов и распознанных не равно.", expected.length, actual.size());
+    @DataProvider
+    public static Object[][] getTestColors() {
+        TestSource[] s = {
+                new TestSource(IndexToColorEnum.BLACK).appendTestColors(1),
+                new TestSource(IndexToColorEnum.BROWN).appendTestColors(1),
+                new TestSource(IndexToColorEnum.RED).appendTestColors(1),
+                new TestSource(IndexToColorEnum.ORANGE).appendTestColors(1),
+                new TestSource(IndexToColorEnum.YELLOW).appendTestColors(1),
+                new TestSource(IndexToColorEnum.GREEN).appendTestColors(1),
+                new TestSource(IndexToColorEnum.BLUE).appendTestColors(1),
+                new TestSource(IndexToColorEnum.PURPLE).appendTestColors(1),
+                new TestSource(IndexToColorEnum.GRAY).appendTestColors(1),
+                new TestSource(IndexToColorEnum.WHITE).appendTestColors(1),
 
-        for (int i = 0; i < expected.length; i++) {
-            Assert.assertEquals(String.format("Цвет под индексом %d ожидаемый - %s, но распознанный - %s",
-                    i,
-                    expected[i].name(),
-                    IndexToColorEnum.getColorByIndex(actual.valueAt(i)).name()),
-                    expected[i].getIndex(),
-                    actual.valueAt(i));
-        }
+        };
+        Object[][] objects = new Object[s.length][1];
+        for (int i = 0; i < objects.length; i++) objects[i][0] = s[i];
+        return objects;
     }
 }

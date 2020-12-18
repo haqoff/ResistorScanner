@@ -32,9 +32,10 @@ import java.util.Date;
 import ru.haqon.resistor.logic.OhmStringFormatter;
 import ru.haqon.R;
 import ru.haqon.layout.views.ResistorCameraView;
-import ru.haqon.resistor.logic.ResistorScannerHelper;
+import ru.haqon.resistor.logic.ResistorScanner;
 import ru.haqon.data.AppSQLiteDBHelper;
 import ru.haqon.data.models.HistoryModel;
+import ru.haqon.resistor.logic.ScanMode;
 
 
 public class MainActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
@@ -46,16 +47,13 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
     private OhmStringFormatter _formatter;
     private long _lastRecognizedValue;
 
-    private BaseLoaderCallback _loaderCallback = new BaseLoaderCallback(this) {
+    private final BaseLoaderCallback _loaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS:
-                    _resistorCameraView.enableView();
-                    break;
-                default:
-                    super.onManagerConnected(status);
-                    break;
+            if (status == LoaderCallbackInterface.SUCCESS) {
+                _resistorCameraView.enableView();
+            } else {
+                super.onManagerConnected(status);
             }
         }
     };
@@ -124,40 +122,29 @@ public class MainActivity extends Activity implements CameraBridgeViewBase.CvCam
 
         final int imageWidth = imageMat.cols();
         final int imageHeight = imageMat.rows();
-        final int searchMatFromX = imageWidth / 2 - 50;
-        final int searchMatToX = imageWidth / 2 + 50;
-        final int searchMatFromY = imageHeight / 2 - 10;
-        final int searchMatToY = imageHeight / 2 + 10;
+        final int searchAreaFromX = imageWidth / 2 - 50;
+        final int searchAreaToX = imageWidth / 2 + 50;
+        final int searchAreaFromY = imageHeight / 2 - 10;
+        final int searchAreaToY = imageHeight / 2 + 10;
 
-        Mat subMat = imageMat.submat(searchMatFromY, searchMatToY, searchMatFromX, searchMatToX);
-        Mat filteredMat = new Mat();
-        Imgproc.cvtColor(subMat, subMat, Imgproc.COLOR_RGBA2BGR);
-        Imgproc.bilateralFilter(subMat, filteredMat, 5, 80, 80);
-        Imgproc.cvtColor(filteredMat, filteredMat, Imgproc.COLOR_BGR2HSV);
+        Mat searchAreaInHsv = imageMat.submat(searchAreaFromY, searchAreaToY, searchAreaFromX, searchAreaToX);
+        Imgproc.cvtColor(searchAreaInHsv, searchAreaInHsv, Imgproc.COLOR_RGBA2RGB);
+        Imgproc.cvtColor(searchAreaInHsv, searchAreaInHsv, Imgproc.COLOR_RGB2HSV);
 
-        long ohmValue = ResistorScannerHelper.calcResistorValueByColors(ResistorScannerHelper.findResistorColors(filteredMat, 2, 10));
-        _lastRecognizedValue = ohmValue;
-
+        Scalar colorToDraw = new Scalar(255, 0, 0, 255);
+        long ohmValue = ResistorScanner.smartScan(searchAreaInHsv, ScanMode.UNKNOWN);
         if (ohmValue > 0) {
-            String formattedValue = _formatter.format(ohmValue);
-            Size textSize = Imgproc.getTextSize(formattedValue, Imgproc.FONT_HERSHEY_COMPLEX, 2, 3, null);
-            Imgproc.putText(imageMat, formattedValue, new Point((imageWidth / 2d) - (textSize.width / 2d), 100), Imgproc.FONT_HERSHEY_COMPLEX,
-                    2, new Scalar(255, 0, 0, 255), 3);
+            _lastRecognizedValue = ohmValue;
+            colorToDraw = new Scalar(0, 255, 0, 255);
         }
 
-        Mat to = new Mat();
-        Imgproc.cvtColor(filteredMat, to, Imgproc.COLOR_HSV2RGB);
-        Imgproc.cvtColor(to, to, Imgproc.COLOR_RGB2RGBA);
+        String formattedValue = _formatter.format(_lastRecognizedValue);
+        Size textSize = Imgproc.getTextSize(formattedValue, Imgproc.FONT_HERSHEY_COMPLEX, 2, 3, null);
+        Imgproc.putText(imageMat, formattedValue, new Point((imageWidth / 2d) - (textSize.width / 2d), 100), Imgproc.FONT_HERSHEY_COMPLEX,
+                2, colorToDraw, 3);
 
-        for (int x = 0; x < to.width(); x++) {
-            for (int y = 0; y < to.height(); y++) {
-                imageMat.put(searchMatFromY + y, searchMatFromX + x, to.get(y, x));
-            }
-        }
-        Imgproc.rectangle(imageMat, new Rect(new Point(searchMatFromX, searchMatFromY), new Point(searchMatToX, searchMatToY)), new Scalar(0, 0, 255, 255), 1);
-
-        Scalar color = new Scalar(255, 0, 0, 255);
-        Imgproc.line(imageMat, new Point(searchMatFromX, imageHeight / 2), new Point(searchMatToX, imageHeight / 2), color, 2);
+        Imgproc.rectangle(imageMat, new Rect(new Point(searchAreaFromX, searchAreaFromY), new Point(searchAreaToX, searchAreaToY)), colorToDraw, 1);
+        Imgproc.line(imageMat, new Point(searchAreaFromX, imageHeight / 2d), new Point(searchAreaToX, imageHeight / 2d), colorToDraw, 2);
         return imageMat;
     }
 

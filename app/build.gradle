@@ -9,6 +9,18 @@ android {
             storePassword 'keytest'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude("META-INF/*.kotlin_module")
+    }
     splits {
 
     }
@@ -37,10 +49,12 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'com.quickbirdstudios:opencv:4.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'org.jetbrains:annotations-java5:15.0'
     testImplementation 'com.quickbirdstudios:opencv:4.3.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'
     androidTestImplementation 'androidx.test:rules:1.1.0'
+    androidTestImplementation group: 'com.tngtech.junit.dataprovider', name: 'junit4-dataprovider', version: '2.6'
 }
 
 ext.versionCodes = [armeabi: 1, 'armeabi-v7a': 3]
